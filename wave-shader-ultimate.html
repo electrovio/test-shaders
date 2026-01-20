@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Wave Shader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+        }
+        
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 320px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 
+                        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            z-index: 10;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .controls::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .controls::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .controls::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        
+        .control-group {
+            margin-bottom: 16px;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 12px;
+            font-weight: 400;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 6px;
+        }
+        
+        .section-title:first-child {
+            margin-top: 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 200;
+            color: #e0e0e0;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #ff00ff);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 0, 255, 0.4);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #ff00ff);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(255, 0, 255, 0.4);
+        }
+        
+        input[type="color"] {
+            width: 50px;
+            height: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+            overflow: hidden;
+        }
+        
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+            border-radius: 4px;
+        }
+        
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 2px;
+        }
+        
+        input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 2px;
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .color-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .value {
+            float: right;
+            font-size: 12px;
+            color: #00d4ff;
+            font-weight: 200;
+        }
+        
+        h3 {
+            margin-bottom: 16px;
+            font-size: 18px;
+            font-weight: 200;
+            background: linear-gradient(135deg, #00d4ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .color-label {
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div class="controls">
+        <h3>Ultimate Controls</h3>
+        
+        <div class="section-title">Animation</div>
+        
+        <div class="control-group">
+            <label>
+                Speed
+                <span class="value" id="speedValue">1.0</span>
+            </label>
+            <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1.0">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Pulse Speed
+                <span class="value" id="pulseSpeedValue">0.5</span>
+            </label>
+            <input type="range" id="pulseSpeed" min="0" max="2" step="0.1" value="0.5">
+        </div>
+        
+        <div class="section-title">Wave Shape</div>
+        
+        <div class="control-group">
+            <label>
+                Line Count
+                <span class="value" id="lineCountValue">10</span>
+            </label>
+            <input type="range" id="lineCount" min="1" max="30" step="1" value="10">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Amplitude
+                <span class="value" id="amplitudeValue">0.15</span>
+            </label>
+            <input type="range" id="amplitude" min="0" max="0.5" step="0.01" value="0.15">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Frequency
+                <span class="value" id="frequencyValue">10.0</span>
+            </label>
+            <input type="range" id="frequency" min="1" max="30" step="0.5" value="10.0">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Y Offset
+                <span class="value" id="yOffsetValue">0.15</span>
+            </label>
+            <input type="range" id="yOffset" min="-1" max="1" step="0.01" value="0.15">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Phase Shift
+                <span class="value" id="phaseValue">0.0</span>
+            </label>
+            <input type="range" id="phase" min="0" max="6.28" step="0.1" value="0">
+        </div>
+        
+        <div class="section-title">Appearance</div>
+        
+        <div class="control-group">
+            <label>
+                Thickness
+                <span class="value" id="thicknessValue">0.003</span>
+            </label>
+            <input type="range" id="thickness" min="0.001" max="0.02" step="0.001" value="0.003">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Glow Intensity
+                <span class="value" id="glowValue">0.2</span>
+            </label>
+            <input type="range" id="glow" min="0" max="1" step="0.05" value="0.2">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Opacity
+                <span class="value" id="opacityValue">0.9</span>
+            </label>
+            <input type="range" id="opacity" min="0" max="1" step="0.05" value="0.9">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Rotation
+                <span class="value" id="rotationValue">0°</span>
+            </label>
+            <input type="range" id="rotation" min="0" max="360" step="1" value="0">
+        </div>
+        
+        <div class="section-title">Effects</div>
+        
+        <div class="control-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="colorCycle">
+                <label for="colorCycle" style="margin-bottom: 0;">Rainbow Cycle</label>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="turbulence">
+                <label for="turbulence" style="margin-bottom: 0;">Turbulence</label>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Turbulence Amount
+                <span class="value" id="turbulenceAmountValue">0.1</span>
+            </label>
+            <input type="range" id="turbulenceAmount" min="0" max="0.5" step="0.01" value="0.1">
+        </div>
+        
+        <div class="section-title">Colors</div>
+
+        <div class="control-group">
+            <label>Wave Colors</label>
+            <div class="color-inputs">
+                <div>
+                    <input type="color" id="color1" value="#00d4ff">
+                    <div class="color-label">Start</div>
+                </div>
+                <div>
+                    <input type="color" id="color2" value="#ff00ff">
+                    <div class="color-label">End</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Background Colors</label>
+            <div class="color-inputs">
+                <div>
+                    <input type="color" id="bgColor1" value="#0a1520">
+                    <div class="color-label">Top</div>
+                </div>
+                <div>
+                    <input type="color" id="bgColor2" value="#000000">
+                    <div class="color-label">Bottom</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        
+        if (!gl) {
+            alert('WebGL not supported in your browser');
+            throw new Error('WebGL not supported');
+        }
+
+        const vertexShaderSource = `
+            attribute vec2 a_position;
+            void main() {
+                gl_Position = vec4(a_position, 0, 1);
+            }
+        `;
+
+        const fragmentShaderSource = `
+            precision mediump float;
+            uniform vec2 iResolution;
+            uniform float iTime;
+            uniform float uSpeed;
+            uniform float uLineCount;
+            uniform float uAmplitude;
+            uniform float uYOffset;
+            uniform float uFrequency;
+            uniform float uPhase;
+            uniform float uThickness;
+            uniform float uGlow;
+            uniform float uOpacity;
+            uniform float uRotation;
+            uniform float uPulseSpeed;
+            uniform float uTurbulenceAmount;
+            uniform bool uColorCycle;
+            uniform bool uTurbulence;
+            uniform vec3 uColor1;
+            uniform vec3 uColor2;
+            uniform vec3 uBgColor1;
+            uniform vec3 uBgColor2;
+
+            const float MAX_LINES = 30.0;
+            const float PI = 3.14159265359;
+
+            // Simple noise function
+            float noise(vec2 p) {
+                return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+            }
+
+            vec2 rotate(vec2 v, float angle) {
+                float s = sin(angle);
+                float c = cos(angle);
+                return vec2(v.x * c - v.y * s, v.x * s + v.y * c);
+            }
+
+            vec3 hueShift(vec3 color, float shift) {
+                const vec3 k = vec3(0.57735, 0.57735, 0.57735);
+                float cosAngle = cos(shift);
+                return color * cosAngle + cross(k, color) * sin(shift) + k * dot(k, color) * (1.0 - cosAngle);
+            }
+
+            float wave(vec2 uv, float speed, float yPos, float thickness, float softness, float lineIndex) {
+                float turbNoise = 0.0;
+                if (uTurbulence) {
+                    turbNoise = (noise(uv * 5.0 + iTime) - 0.5) * uTurbulenceAmount;
+                }
+                
+                float pulse = 1.0 + sin(iTime * uPulseSpeed) * 0.2;
+                float falloff = smoothstep(1.0, 0.5, abs(uv.x));
+                float y = falloff * sin(iTime * speed + uv.x * uFrequency + uPhase + lineIndex) * yPos * pulse - uYOffset + turbNoise;
+                
+                float dist = abs(uv.y - y);
+                float line = 1.0 - smoothstep(thickness, thickness + softness + falloff * uGlow, dist);
+                
+                return line;
+            }
+
+            void main() {
+                vec2 uv = gl_FragCoord.xy / iResolution.y;
+                vec4 col = vec4(0.0, 0.0, 0.0, 1.0);
+
+                col.xyz = mix(uBgColor1, uBgColor2, uv.x + uv.y);
+
+                uv -= 0.5;
+                
+                // Apply rotation
+                float rotRad = uRotation * PI / 180.0;
+                uv = rotate(uv, rotRad);
+
+                float aaDy = iResolution.y * 0.000005;
+                
+                for (float i = 0.0; i < MAX_LINES; i += 1.0) {
+                    if (i <= uLineCount) {
+                        float t = i / (uLineCount - 1.0);
+                        
+                        vec3 lineCol = mix(uColor1, uColor2, t);
+                        
+                        if (uColorCycle) {
+                            lineCol = hueShift(lineCol, iTime + t * 2.0);
+                        }
+                        
+                        float bokeh = pow(t, 3.0);
+                        float thickness = uThickness;
+                        float softness = aaDy + bokeh * uGlow;
+                        float amp = uAmplitude - 0.05 * t;
+                        float amt = max(0.0, pow(1.0 - bokeh, 2.0) * uOpacity);
+                        
+                        col.xyz += wave(uv, uSpeed * (1.0 + t), uAmplitude, thickness, softness, i) * lineCol * amt;
+                    }
+                }
+
+                gl_FragColor = col;
+            }
+        `;
+
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            
+            return shader;
+        }
+
+        function createProgram(gl, vertexShader, fragmentShader) {
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error('Program linking error:', gl.getProgramInfoLog(program));
+                return null;
+            }
+            
+            return program;
+        }
+
+        const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+        const program = createProgram(gl, vertexShader, fragmentShader);
+
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        const positions = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+        const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
+        gl.enableVertexAttribArray(positionAttributeLocation);
+        gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+        // Get all uniform locations
+        const uniforms = {
+            iResolution: gl.getUniformLocation(program, 'iResolution'),
+            iTime: gl.getUniformLocation(program, 'iTime'),
+            uSpeed: gl.getUniformLocation(program, 'uSpeed'),
+            uLineCount: gl.getUniformLocation(program, 'uLineCount'),
+            uAmplitude: gl.getUniformLocation(program, 'uAmplitude'),
+            uYOffset: gl.getUniformLocation(program, 'uYOffset'),
+            uFrequency: gl.getUniformLocation(program, 'uFrequency'),
+            uPhase: gl.getUniformLocation(program, 'uPhase'),
+            uThickness: gl.getUniformLocation(program, 'uThickness'),
+            uGlow: gl.getUniformLocation(program, 'uGlow'),
+            uOpacity: gl.getUniformLocation(program, 'uOpacity'),
+            uRotation: gl.getUniformLocation(program, 'uRotation'),
+            uPulseSpeed: gl.getUniformLocation(program, 'uPulseSpeed'),
+            uTurbulenceAmount: gl.getUniformLocation(program, 'uTurbulenceAmount'),
+            uColorCycle: gl.getUniformLocation(program, 'uColorCycle'),
+            uTurbulence: gl.getUniformLocation(program, 'uTurbulence'),
+            uColor1: gl.getUniformLocation(program, 'uColor1'),
+            uColor2: gl.getUniformLocation(program, 'uColor2'),
+            uBgColor1: gl.getUniformLocation(program, 'uBgColor1'),
+            uBgColor2: gl.getUniformLocation(program, 'uBgColor2'),
+        };
+
+        // Parameters
+        let params = {
+            speed: 1.0,
+            lineCount: 10,
+            amplitude: 0.15,
+            yOffset: 0.15,
+            frequency: 10.0,
+            phase: 0,
+            thickness: 0.003,
+            glow: 0.2,
+            opacity: 0.9,
+            rotation: 0,
+            pulseSpeed: 0.5,
+            turbulenceAmount: 0.1,
+            colorCycle: false,
+            turbulence: false,
+            color1: { r: 0.0, g: 0.83, b: 1.0 },
+            color2: { r: 1.0, g: 0.0, b: 1.0 },
+            bgColor1: { r: 0.04, g: 0.08, b: 0.12 },
+            bgColor2: { r: 0.0, g: 0.0, b: 0.0 },
+        };
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16) / 255,
+                g: parseInt(result[2], 16) / 255,
+                b: parseInt(result[3], 16) / 255
+            } : null;
+        }
+
+        // Setup all controls
+        const controls = {
+            speed: document.getElementById('speed'),
+            lineCount: document.getElementById('lineCount'),
+            amplitude: document.getElementById('amplitude'),
+            yOffset: document.getElementById('yOffset'),
+            frequency: document.getElementById('frequency'),
+            phase: document.getElementById('phase'),
+            thickness: document.getElementById('thickness'),
+            glow: document.getElementById('glow'),
+            opacity: document.getElementById('opacity'),
+            rotation: document.getElementById('rotation'),
+            pulseSpeed: document.getElementById('pulseSpeed'),
+            turbulenceAmount: document.getElementById('turbulenceAmount'),
+            colorCycle: document.getElementById('colorCycle'),
+            turbulence: document.getElementById('turbulence'),
+            color1: document.getElementById('color1'),
+            color2: document.getElementById('color2'),
+            bgColor1: document.getElementById('bgColor1'),
+            bgColor2: document.getElementById('bgColor2'),
+        };
+
+        const values = {
+            speed: document.getElementById('speedValue'),
+            lineCount: document.getElementById('lineCountValue'),
+            amplitude: document.getElementById('amplitudeValue'),
+            yOffset: document.getElementById('yOffsetValue'),
+            frequency: document.getElementById('frequencyValue'),
+            phase: document.getElementById('phaseValue'),
+            thickness: document.getElementById('thicknessValue'),
+            glow: document.getElementById('glowValue'),
+            opacity: document.getElementById('opacityValue'),
+            rotation: document.getElementById('rotationValue'),
+            pulseSpeed: document.getElementById('pulseSpeedValue'),
+            turbulenceAmount: document.getElementById('turbulenceAmountValue'),
+        };
+
+        controls.speed.addEventListener('input', (e) => {
+            params.speed = parseFloat(e.target.value);
+            values.speed.textContent = params.speed.toFixed(1);
+        });
+
+        controls.lineCount.addEventListener('input', (e) => {
+            params.lineCount = parseInt(e.target.value);
+            values.lineCount.textContent = params.lineCount;
+        });
+
+        controls.amplitude.addEventListener('input', (e) => {
+            params.amplitude = parseFloat(e.target.value);
+            values.amplitude.textContent = params.amplitude.toFixed(2);
+        });
+
+        controls.yOffset.addEventListener('input', (e) => {
+            params.yOffset = parseFloat(e.target.value);
+            values.yOffset.textContent = params.yOffset.toFixed(2);
+        });
+
+        controls.frequency.addEventListener('input', (e) => {
+            params.frequency = parseFloat(e.target.value);
+            values.frequency.textContent = params.frequency.toFixed(1);
+        });
+
+        controls.phase.addEventListener('input', (e) => {
+            params.phase = parseFloat(e.target.value);
+            values.phase.textContent = params.phase.toFixed(1);
+        });
+
+        controls.thickness.addEventListener('input', (e) => {
+            params.thickness = parseFloat(e.target.value);
+            values.thickness.textContent = params.thickness.toFixed(3);
+        });
+
+        controls.glow.addEventListener('input', (e) => {
+            params.glow = parseFloat(e.target.value);
+            values.glow.textContent = params.glow.toFixed(2);
+        });
+
+        controls.opacity.addEventListener('input', (e) => {
+            params.opacity = parseFloat(e.target.value);
+            values.opacity.textContent = params.opacity.toFixed(2);
+        });
+
+        controls.rotation.addEventListener('input', (e) => {
+            params.rotation = parseFloat(e.target.value);
+            values.rotation.textContent = params.rotation + '°';
+        });
+
+        controls.pulseSpeed.addEventListener('input', (e) => {
+            params.pulseSpeed = parseFloat(e.target.value);
+            values.pulseSpeed.textContent = params.pulseSpeed.toFixed(1);
+        });
+
+        controls.turbulenceAmount.addEventListener('input', (e) => {
+            params.turbulenceAmount = parseFloat(e.target.value);
+            values.turbulenceAmount.textContent = params.turbulenceAmount.toFixed(2);
+        });
+
+        controls.colorCycle.addEventListener('change', (e) => {
+            params.colorCycle = e.target.checked;
+        });
+
+        controls.turbulence.addEventListener('change', (e) => {
+            params.turbulence = e.target.checked;
+        });
+
+        controls.color1.addEventListener('input', (e) => {
+            params.color1 = hexToRgb(e.target.value);
+        });
+
+        controls.color2.addEventListener('input', (e) => {
+            params.color2 = hexToRgb(e.target.value);
+        });
+
+        controls.bgColor1.addEventListener('input', (e) => {
+            params.bgColor1 = hexToRgb(e.target.value);
+        });
+
+        controls.bgColor2.addEventListener('input', (e) => {
+            params.bgColor2 = hexToRgb(e.target.value);
+        });
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        const startTime = Date.now();
+
+        function render() {
+            const currentTime = (Date.now() - startTime) / 1000;
+
+            gl.useProgram(program);
+            
+            gl.uniform2f(uniforms.iResolution, canvas.width, canvas.height);
+            gl.uniform1f(uniforms.iTime, currentTime);
+            gl.uniform1f(uniforms.uSpeed, params.speed);
+            gl.uniform1f(uniforms.uLineCount, params.lineCount);
+            gl.uniform1f(uniforms.uAmplitude, params.amplitude);
+            gl.uniform1f(uniforms.uYOffset, params.yOffset);
+            gl.uniform1f(uniforms.uFrequency, params.frequency);
+            gl.uniform1f(uniforms.uPhase, params.phase);
+            gl.uniform1f(uniforms.uThickness, params.thickness);
+            gl.uniform1f(uniforms.uGlow, params.glow);
+            gl.uniform1f(uniforms.uOpacity, params.opacity);
+            gl.uniform1f(uniforms.uRotation, params.rotation);
+            gl.uniform1f(uniforms.uPulseSpeed, params.pulseSpeed);
+            gl.uniform1f(uniforms.uTurbulenceAmount, params.turbulenceAmount);
+            gl.uniform1i(uniforms.uColorCycle, params.colorCycle ? 1 : 0);
+            gl.uniform1i(uniforms.uTurbulence, params.turbulence ? 1 : 0);
+            gl.uniform3f(uniforms.uColor1, params.color1.r, params.color1.g, params.color1.b);
+            gl.uniform3f(uniforms.uColor2, params.color2.r, params.color2.g, params.color2.b);
+            gl.uniform3f(uniforms.uBgColor1, params.bgColor1.r, params.bgColor1.g, params.bgColor1.b);
+            gl.uniform3f(uniforms.uBgColor2, params.bgColor2.r, params.bgColor2.g, params.bgColor2.b);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            requestAnimationFrame(render);
+        }
+
+        render();
+    </script>
+</body>
+</html>

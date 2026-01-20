@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Dreams</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 0, 255, 0.2);
+            color: white;
+            width: 300px;
+            box-shadow: 0 12px 48px rgba(255, 0, 255, 0.3), 
+                        0 0 0 1px rgba(0, 255, 255, 0.1) inset,
+                        0 0 60px rgba(255, 0, 255, 0.2);
+            z-index: 10;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 200;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, 
+                rgba(0, 255, 255, 0.2) 0%, 
+                rgba(255, 0, 255, 0.2) 100%);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffff, #ff00ff);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.8),
+                        0 0 20px rgba(0, 255, 255, 0.6);
+            transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 1),
+                        0 0 30px rgba(0, 255, 255, 0.8);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffff, #ff00ff);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.8),
+                        0 0 20px rgba(0, 255, 255, 0.6);
+        }
+        
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-right: 10px;
+            accent-color: #ff00ff;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+        }
+        
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+        
+        .value {
+            float: right;
+            font-size: 13px;
+            color: #00ffff;
+            font-weight: 300;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+        
+        h3 {
+            margin-bottom: 24px;
+            font-size: 24px;
+            font-weight: 200;
+            text-align: center;
+            background: linear-gradient(135deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: neonGradient 3s ease infinite;
+            text-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        }
+        
+        @keyframes neonGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 0, 255, 0.5), 
+                rgba(0, 255, 255, 0.5), 
+                transparent);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div class="controls">
+        <h3>neon dreams</h3>
+        
+        <div class="control-group">
+            <label>
+                Dream Speed
+                <span class="value" id="speedValue">1.2</span>
+            </label>
+            <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1.2">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Glow Intensity
+                <span class="value" id="glowValue">0.6</span>
+            </label>
+            <input type="range" id="glow" min="0" max="1" step="0.05" value="0.6">
+        </div>
+        
+        <div class="control-group">
+            <label>
+                Pulse Rhythm
+                <span class="value" id="pulseValue">1.0</span>
+            </label>
+            <input type="range" id="pulse" min="0" max="3" step="0.1" value="1.0">
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="control-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="rainbow" checked>
+                <label for="rainbow">Rainbow Cycle</label>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="dreamy">
+                <label for="dreamy">Dreamy Blur</label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        
+        if (!gl) {
+            alert('WebGL not supported in your browser');
+            throw new Error('WebGL not supported');
+        }
+
+        const vertexShaderSource = `
+            attribute vec2 a_position;
+            void main() {
+                gl_Position = vec4(a_position, 0, 1);
+            }
+        `;
+
+        const fragmentShaderSource = `
+            precision mediump float;
+            uniform vec2 iResolution;
+            uniform float iTime;
+            uniform float uSpeed;
+            uniform float uGlow;
+            uniform float uPulse;
+            uniform bool uRainbow;
+            uniform bool uDreamy;
+
+            const float MAX_LINES = 15.0;
+            const float PI = 3.14159265359;
+
+            vec3 hueShift(vec3 color, float shift) {
+                const vec3 k = vec3(0.57735, 0.57735, 0.57735);
+                float cosAngle = cos(shift);
+                return color * cosAngle + cross(k, color) * sin(shift) + k * dot(k, color) * (1.0 - cosAngle);
+            }
+
+            float wave(vec2 uv, float speed, float yPos, float thickness, float softness, float lineIndex) {
+                float pulse = 1.0 + sin(iTime * uPulse) * 0.3;
+                float falloff = smoothstep(1.0, 0.3, abs(uv.x));
+                float y = falloff * sin(iTime * speed + uv.x * 8.0 + lineIndex * 0.5) * yPos * pulse - 0.1;
+                
+                float dist = abs(uv.y - y);
+                float line = 1.0 - smoothstep(thickness, thickness + softness + falloff * uGlow, dist);
+                
+                // Add extra glow layers for neon effect
+                float glow1 = exp(-dist * 20.0) * uGlow * 0.5;
+                float glow2 = exp(-dist * 10.0) * uGlow * 0.3;
+                
+                return line + glow1 + glow2;
+            }
+
+            void main() {
+                vec2 uv = gl_FragCoord.xy / iResolution.y;
+                vec4 col = vec4(0.0, 0.0, 0.0, 1.0);
+
+                // Deep space background with subtle gradient
+                vec3 bg1 = vec3(0.0, 0.02, 0.05);
+                vec3 bg2 = vec3(0.05, 0.0, 0.08);
+                col.xyz = mix(bg1, bg2, uv.x + uv.y * 0.5);
+
+                uv -= 0.5;
+
+                float aaDy = iResolution.y * 0.000005;
+                
+                for (float i = 0.0; i < MAX_LINES; i += 1.0) {
+                    float t = i / (MAX_LINES - 1.0);
+                    
+                    // Neon cyan to magenta gradient
+                    vec3 cyan = vec3(0.0, 1.0, 1.0);
+                    vec3 magenta = vec3(1.0, 0.0, 1.0);
+                    vec3 lineCol = mix(cyan, magenta, t);
+                    
+                    if (uRainbow) {
+                        lineCol = hueShift(lineCol, iTime * 0.5 + t * 2.0);
+                    }
+                    
+                    float bokeh = pow(t, 2.5);
+                    float thickness = uDreamy ? 0.006 : 0.003;
+                    float softness = aaDy + bokeh * uGlow * 0.4;
+                    float amplitude = 0.2 - 0.05 * t;
+                    float intensity = max(0.0, pow(1.0 - bokeh, 1.5));
+                    
+                    float waveVal = wave(uv, uSpeed * (1.0 + t * 0.3), amplitude, thickness, softness, i);
+                    col.xyz += waveVal * lineCol * intensity;
+                }
+                
+                // Boost saturation for extra neon pop
+                col.xyz = pow(col.xyz, vec3(0.9));
+
+                gl_FragColor = col;
+            }
+        `;
+
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            
+            return shader;
+        }
+
+        function createProgram(gl, vertexShader, fragmentShader) {
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error('Program linking error:', gl.getProgramInfoLog(program));
+                return null;
+            }
+            
+            return program;
+        }
+
+        const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+        const program = createProgram(gl, vertexShader, fragmentShader);
+
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        const positions = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+        const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
+        gl.enableVertexAttribArray(positionAttributeLocation);
+        gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+        const uniforms = {
+            iResolution: gl.getUniformLocation(program, 'iResolution'),
+            iTime: gl.getUniformLocation(program, 'iTime'),
+            uSpeed: gl.getUniformLocation(program, 'uSpeed'),
+            uGlow: gl.getUniformLocation(program, 'uGlow'),
+            uPulse: gl.getUniformLocation(program, 'uPulse'),
+            uRainbow: gl.getUniformLocation(program, 'uRainbow'),
+            uDreamy: gl.getUniformLocation(program, 'uDreamy'),
+        };
+
+        let params = {
+            speed: 1.2,
+            glow: 0.6,
+            pulse: 1.0,
+            rainbow: true,
+            dreamy: false,
+        };
+
+        const controls = {
+            speed: document.getElementById('speed'),
+            glow: document.getElementById('glow'),
+            pulse: document.getElementById('pulse'),
+            rainbow: document.getElementById('rainbow'),
+            dreamy: document.getElementById('dreamy'),
+        };
+
+        const values = {
+            speed: document.getElementById('speedValue'),
+            glow: document.getElementById('glowValue'),
+            pulse: document.getElementById('pulseValue'),
+        };
+
+        controls.speed.addEventListener('input', (e) => {
+            params.speed = parseFloat(e.target.value);
+            values.speed.textContent = params.speed.toFixed(1);
+        });
+
+        controls.glow.addEventListener('input', (e) => {
+            params.glow = parseFloat(e.target.value);
+            values.glow.textContent = params.glow.toFixed(2);
+        });
+
+        controls.pulse.addEventListener('input', (e) => {
+            params.pulse = parseFloat(e.target.value);
+            values.pulse.textContent = params.pulse.toFixed(1);
+        });
+
+        controls.rainbow.addEventListener('change', (e) => {
+            params.rainbow = e.target.checked;
+        });
+
+        controls.dreamy.addEventListener('change', (e) => {
+            params.dreamy = e.target.checked;
+        });
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        const startTime = Date.now();
+
+        function render() {
+            const currentTime = (Date.now() - startTime) / 1000;
+
+            gl.useProgram(program);
+            
+            gl.uniform2f(uniforms.iResolution, canvas.width, canvas.height);
+            gl.uniform1f(uniforms.iTime, currentTime);
+            gl.uniform1f(uniforms.uSpeed, params.speed);
+            gl.uniform1f(uniforms.uGlow, params.glow);
+            gl.uniform1f(uniforms.uPulse, params.pulse);
+            gl.uniform1i(uniforms.uRainbow, params.rainbow ? 1 : 0);
+            gl.uniform1i(uniforms.uDreamy, params.dreamy ? 1 : 0);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            requestAnimationFrame(render);
+        }
+
+        render();
+    </script>
+</body>
+</html>
